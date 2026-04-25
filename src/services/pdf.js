@@ -19,9 +19,9 @@ function loadScript(src, key) {
   });
 }
 
-export async function generatePDF(entry, showToast) {
+async function buildVoucherDoc(entry) {
   await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', 'jspdf');
-  if (!window.jspdf) { showToast('PDF engine unavailable', 'error'); return; }
+  if (!window.jspdf) return null;
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -117,5 +117,43 @@ export async function generatePDF(entry, showToast) {
     cell(ml + i * sw, y, sw, 14, LG, lbl, NAVY, 7, true, 'center');
   });
 
+  return doc;
+}
+
+export async function generatePDF(entry, showToast) {
+  const doc = await buildVoucherDoc(entry);
+  if (!doc) { showToast('PDF engine unavailable', 'error'); return; }
   doc.save(`${entry.voucher_no || 'voucher'}_Hafeez_Trading.pdf`);
+}
+
+export async function printVoucher(entry, showToast) {
+  const doc = await buildVoucherDoc(entry);
+  if (!doc) { showToast('PDF engine unavailable', 'error'); return; }
+
+  doc.autoPrint();
+  const blobUrl = doc.output('bloburl');
+
+  const prev = document.getElementById('htc-print-frame');
+  if (prev) prev.remove();
+
+  const iframe = document.createElement('iframe');
+  iframe.id = 'htc-print-frame';
+  iframe.style.position = 'fixed';
+  iframe.style.right = '0';
+  iframe.style.bottom = '0';
+  iframe.style.width = '0';
+  iframe.style.height = '0';
+  iframe.style.border = '0';
+  iframe.src = blobUrl;
+  document.body.appendChild(iframe);
+
+  iframe.onload = () => {
+    try {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+    } catch (e) {
+      console.error('Print failed', e);
+      showToast('Print failed', 'error');
+    }
+  };
 }

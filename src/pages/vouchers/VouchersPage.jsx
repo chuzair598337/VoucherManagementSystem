@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react';
 import { INIT_CATS, INIT_PAYEES, SAMPLE } from '../../constants/seed';
-import { generatePDF } from '../../services/pdf';
+import { generatePDF, printVoucher } from '../../services/pdf';
 import LedgerView from './LedgerView';
 import VoucherForm from './VoucherForm';
 
-export default function VouchersPage({ showToast, onRequestPrint }) {
+export default function VouchersPage({ showToast }) {
   const [entries, setEntries] = useState(SAMPLE);
   const [categories, setCategories] = useState(INIT_CATS);
   const [payees, setPayees] = useState(INIT_PAYEES);
@@ -35,6 +35,25 @@ export default function VouchersPage({ showToast, onRequestPrint }) {
       setEntries(p => [...p, { ...form, id: Date.now() }]);
       showToast('Entry created successfully');
     }
+
+    // ── Electron: auto-save PDF to VoucherDoc directory ──
+    const isElectron = typeof window !== 'undefined' && !!window.electronAPI;
+    if (isElectron) {
+      const entryForPDF = editId
+        ? { ...form, id: editId }
+        : { ...form, id: Date.now() };
+
+      window.electronAPI.saveVoucherPDF(entryForPDF)
+        .then(result => {
+          if (result.success) {
+            showToast(`PDF saved → VoucherDoc/${form.pay_to}/${form.voucher_type}`, 'info');
+          } else {
+            showToast(`Auto-save failed: ${result.error}`, 'error');
+          }
+        })
+        .catch(() => showToast('Auto-save failed', 'error'));
+    }
+
     setView('ledger');
     setEditEntry(null);
   }, [showToast]);
@@ -51,6 +70,20 @@ export default function VouchersPage({ showToast, onRequestPrint }) {
   const addCategory = useCallback((name) => {
     setCategories(p => p.includes(name) ? p : [...p, name]);
   }, []);
+
+  const handlePrint = useCallback(async (entry) => {
+    if (pdfBusy) return;
+    setPdfBusy(true);
+    showToast('Preparing print…', 'info');
+    try {
+      await printVoucher(entry, showToast);
+    } catch (err) {
+      console.error(err);
+      showToast('Print failed', 'error');
+    } finally {
+      setPdfBusy(false);
+    }
+  }, [pdfBusy, showToast]);
 
   const handleDownload = useCallback(async (entry) => {
     if (pdfBusy) return;
@@ -90,7 +123,7 @@ export default function VouchersPage({ showToast, onRequestPrint }) {
       onOpenCreate={openCreate}
       onOpenEdit={openEdit}
       onDelete={deleteEntry}
-      onPrint={onRequestPrint}
+      onPrint={handlePrint}
       onDownload={handleDownload}
     />
   );
