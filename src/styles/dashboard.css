@@ -1,0 +1,63 @@
+.dash-welcome {
+  background: linear-gradient(135deg, #1F3864 0%, #0077A8 100%);
+  color: #fff;
+  border-radius: 12px;
+  padding: 24px 26px;
+  margin-bottom: 18px;
+}
+.dash-welcome h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.dash-welcome p {
+  font-size: 13px;
+  color: #C8DBEF;
+  max-width: 560px;
+  line-height: 1.5;
+}
+
+.dash-modules {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+.dash-module {
+  background: #fff;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: border-color .15s, box-shadow .15s, transform .15s;
+}
+.dash-module:hover {
+  border-color: #00A0D2;
+  box-shadow: 0 4px 18px rgba(0, 119, 168, .08);
+  transform: translateY(-1px);
+}
+.dash-module-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 9px;
+  background: #EBF3FB;
+  color: #1F3864;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.dash-module-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1F3864;
+}
+.dash-module-desc {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+}

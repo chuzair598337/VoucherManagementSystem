@@ -1,0 +1,210 @@
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.sc {
+  background: #fff;
+  border-radius: 10px;
+  padding: 14px 16px;
+  border: 1px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.si {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.sl {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 500;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.sv {
+  font-size: 20px;
+  font-weight: 600;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.card {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #E2E8F0;
+  overflow: hidden;
+}
+.ch {
+  padding: 13px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #F1F5F9;
+  background: #FAFBFC;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.ct {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1F3864;
+}
+.ctrls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.sw { position: relative; }
+.sw svg {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+}
+.sw input {
+  padding: 7px 10px 7px 28px;
+  border: 1px solid #E2E8F0;
+  border-radius: 7px;
+  font-size: 12px;
+  width: 190px;
+  outline: none;
+  font-family: inherit;
+  color: #1e293b;
+  background: #fff;
+}
+.sw input:focus { border-color: #00A0D2; }
+
+select.flt {
+  padding: 7px 10px;
+  border: 1px solid #E2E8F0;
+  border-radius: 7px;
+  font-size: 12px;
+  outline: none;
+  background: #fff;
+  font-family: inherit;
+  color: #1e293b;
+  cursor: pointer;
+}
+select.flt:focus { border-color: #00A0D2; }
+
+.sort-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 11px;
+  border: 1px solid #E2E8F0;
+  border-radius: 7px;
+  font-size: 12px;
+  background: #fff;
+  cursor: pointer;
+  color: #475569;
+  font-family: inherit;
+}
+.sort-btn:hover {
+  background: #F8FAFC;
+  border-color: #00A0D2;
+  color: #1F3864;
+}
+
+table.lg {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+table.lg th {
+  padding: 9px 12px;
+  text-align: left;
+  background: #1F3864;
+  color: #CBD5E1;
+  font-weight: 600;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  white-space: nowrap;
+}
+table.lg td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #F8FAFC;
+  vertical-align: middle;
+  color: #334155;
+}
+table.lg tr:hover td { background: #F8FBFF; }
+table.lg tfoot td {
+  background: #EBF3FB;
+  border-top: 2px solid #D9EEF7;
+  font-weight: 600;
+  color: #1F3864;
+  padding: 9px 12px;
+}
+
+.vno {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500;
+  color: #1F3864;
+  font-size: 12px;
+}
+.badge {
+  display: inline-flex;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 600;
+}
+.bd { background: #FEE2E2; color: #991B1B; }
+.bc { background: #DCFCE7; color: #166534; }
+
+.amc {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500;
+  text-align: right;
+  font-size: 12px;
+}
+
+/* Row action buttons: 2 rows of 3 */
+.acts {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.acts-row {
+  display: flex;
+  gap: 3px;
+}
+.ab {
+  width: 27px;
+  height: 27px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity .15s;
+  flex-shrink: 0;
+}
+.ab:hover { opacity: .7; }
+.ab:disabled { opacity: .35; cursor: not-allowed; }
+.apv { background: #EDE9FE; color: #7C3AED; }
+.aed { background: #DBEAFE; color: #1D4ED8; }
+.apr { background: #DCFCE7; color: #15803D; }
+.adl { background: #FEF3C7; color: #B45309; }
+.adx { background: #FEE2E2; color: #DC2626; }
+.aph { background: #F0F9FF; color: #0077A8; }
+
+.empty {
+  text-align: center;
+  padding: 56px 20px;
+  color: #94a3b8;
+}
+.empty svg { margin-bottom: 10px; opacity: .25; }
+.empty p { font-size: 13px; }
