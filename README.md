@@ -13,10 +13,8 @@ A professional **Debit/Credit Voucher Management System** built with React + Vit
 - [Installation & Setup](#installation--setup)
 - [VS Code Setup](#vs-code-setup)
 - [Project Structure](#project-structure)
-  - [Current Single-File Structure](#current-single-file-structure)
-  - [Recommended Component Structure](#recommended-component-structure)
+  - [Layout overview](#layout-overview)
 - [Component Breakdown](#component-breakdown)
-- [Utility Functions](#utility-functions)
 - [Data Model](#data-model)
 - [State Management](#state-management)
 - [Feature Guide](#feature-guide)
@@ -65,7 +63,7 @@ This system was built to modernize the paper/Excel-based voucher workflow at Haf
 | **Language** | JavaScript (JSX) |
 | **Icons** | lucide-react |
 | **PDF** | jsPDF (loaded from CDN at runtime) |
-| **Styling** | Plain CSS (injected via JS string — no framework) |
+| **Styling** | Plain CSS in `src/styles/*.css` — no framework |
 | **Fonts** | IBM Plex Sans + IBM Plex Mono (Google Fonts) |
 
 ---
@@ -93,46 +91,21 @@ Download from [git-scm.com](https://git-scm.com)
 
 ## Installation & Setup
 
-### Step 1 — Create the Vite + React project
-
-Open a terminal and run:
+### Step 1 — Clone or open the project
 
 ```bash
-npm create vite@latest hafeez-voucher -- --template react
-cd hafeez-voucher
+cd voucherManagementSystem
 ```
 
 ### Step 2 — Install dependencies
 
 ```bash
 npm install
-npm install lucide-react
 ```
 
-### Step 3 — Replace `src/App.jsx`
+This installs `react`, `react-dom`, `lucide-react`, `jspdf`, and the Vite/ESLint dev tooling listed in `package.json`.
 
-Delete all content in `src/App.jsx` and paste the full application code.
-
-### Step 4 — Clear global CSS files
-
-**`src/App.css`** — delete all content (leave the file empty).
-
-**`src/index.css`** — replace with:
-
-```css
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-}
-```
-
-### Step 5 — Run the development server
+### Step 3 — Run the development server
 
 ```bash
 npm run dev
@@ -149,7 +122,7 @@ The app loads with 4 sample voucher entries ready to explore.
 ### Open the project
 
 ```bash
-cd hafeez-voucher
+cd voucherManagementSystem
 code .
 ```
 
@@ -196,456 +169,132 @@ npm run preview   # Preview production build locally
 
 ## Project Structure
 
-### Current Single-File Structure
-
-Right now, the entire app lives in `App.jsx`. Here is what that single file contains, section by section:
+The app uses a **Sidebar + TopBar shell** with a slim `App.jsx` that delegates to per-page modules. Voucher state is owned by `pages/vouchers/VouchersPage.jsx`; routing-level state (current page, toast, print) lives in `App.jsx`.
 
 ```
-src/App.jsx
-│
-├── [1] Amount Helpers          parseAmt(), fmtAmt(), fmtAmtRs(), fmtAmtPs()
-├── [2] Number to Words         numToWords()
-├── [3] Date Helpers            toPicker(), fromPicker(), todayYMD(), dateToTs()
-├── [4] Voucher Helpers         nextNo(), validate()
-├── [5] Constants               INIT_CATS, INIT_PAYEES, SAMPLE data, EMPTY form
-├── [6] Voucher HTML Generator  voucherHtml()  — builds HTML string for preview/print
-├── [7] PDF Generator           generatePDF()  — draws PDF programmatically with jsPDF
-├── [8] CSS String              CSS            — all styles as a JS template literal
-└── [9] App Component           export default function App()
-        ├── All useState hooks
-        ├── Filter + Sort logic
-        ├── Form handlers
-        ├── Add Payee handler
-        ├── Add Category handler
-        ├── Print handler
-        ├── PDF download handler
-        ├── PrintArea div (hidden, used by @media print)
-        ├── LEDGER VIEW (rendered when view === 'ledger')
-        │     ├── Header
-        │     ├── Stats cards (4)
-        │     ├── Controls (search, filter, sort)
-        │     ├── Ledger table
-        │     ├── Preview Modal
-        │     └── Delete Confirm Modal
-        └── FORM VIEW (rendered when view === 'form')
-              ├── Header
-              ├── Back button
-              ├── Voucher Identity section
-              ├── Party, Amount & References section
-              ├── Add Payee Modal
-              └── Add Category Modal
-```
-
----
-
-### Recommended Component Structure
-
-When you are ready to split the single file into a proper multi-file project, follow this structure. Each file is described in detail in the [Component Breakdown](#component-breakdown) section below.
-
-```
-hafeez-voucher/
+voucherManagementSystem/
 │
 ├── public/
 │   └── favicon.ico
 │
 ├── src/
 │   │
-│   ├── main.jsx                          ← React entry point (do not modify)
-│   │
-│   ├── App.jsx                           ← Root component: holds global state,
-│   │                                         routes between Ledger and Form views
+│   ├── main.jsx                          ← React entry; imports global stylesheets
+│   ├── index.css                         ← CSS reset
+│   ├── App.jsx                           ← Routing state + AppShell + active page
 │   │
 │   ├── constants/
-│   │   └── data.js                       ← INIT_CATS, INIT_PAYEES, SAMPLE, EMPTY
+│   │   └── seed.js                       ← INIT_CATS, INIT_PAYEES, SAMPLE, EMPTY, COMPANY
 │   │
 │   ├── utils/
-│   │   ├── amountHelpers.js              ← parseAmt, fmtAmt, fmtAmtRs, fmtAmtPs
-│   │   ├── numberToWords.js              ← numToWords (Pakistani Lakh/Crore format)
-│   │   ├── dateHelpers.js                ← toPicker, fromPicker, todayYMD, dateToTs
-│   │   ├── voucherHelpers.js             ← nextNo (auto-increment), validate (form)
+│   │   ├── amount.js                     ← parseAmt, fmtAmt, fmtAmtRs, fmtAmtPs, numToWords
+│   │   ├── date.js                       ← toPicker, fromPicker, todayYMD, dateToTs
+│   │   └── voucher.js                    ← nextNo (auto-increment), validate (form)
+│   │
+│   ├── services/
 │   │   ├── voucherHtml.js                ← voucherHtml() — HTML string for preview/print
-│   │   └── generatePDF.js                ← generatePDF() — jsPDF programmatic draw
+│   │   └── pdf.js                        ← generatePDF() — programmatic jsPDF draw
 │   │
 │   ├── styles/
-│   │   └── app.css                       ← All CSS extracted from the CSS string
+│   │   ├── shared.css                    ← Buttons, modals, toast, print rules, fonts
+│   │   ├── layout.css                    ← App shell, Sidebar, TopBar
+│   │   ├── ledger.css                    ← Stats grid, ledger table, action buttons
+│   │   ├── form.css                      ← Voucher form sections and inputs
+│   │   └── dashboard.css                 ← Dashboard welcome card and module tiles
+│   │
+│   ├── context/
+│   │   ├── TopBarContext.js              ← React context for TopBar title + actions
+│   │   └── TopBarProvider.jsx            ← Provider component wrapping the app
+│   │
+│   ├── hooks/
+│   │   ├── useToast.js                   ← Toast state + auto-dismiss timer
+│   │   └── useTopBar.js                  ← useTopBar(title, actions, deps) + useTopBarState
+│   │
+│   ├── layout/
+│   │   ├── AppShell.jsx                  ← CSS-grid shell: Sidebar | TopBar / content
+│   │   ├── Sidebar.jsx                   ← Company header + Dashboard / Modules nav
+│   │   └── TopBar.jsx                    ← Current screen title + action buttons
 │   │
 │   ├── components/
-│   │   │
-│   │   ├── layout/
-│   │   │   └── Header.jsx                ← Top navy bar with brand + action button
-│   │   │
-│   │   ├── common/
-│   │   │   ├── Toast.jsx                 ← Slide-up notification (success/error/info)
-│   │   │   ├── ErrorMessage.jsx          ← Red field-level validation message
-│   │   │   └── StatCard.jsx              ← Dashboard summary card (icon + label + value)
-│   │   │
+│   │   ├── PrintArea.jsx                 ← Hidden #htc-print div used by @media print
+│   │   ├── Toast.jsx                     ← Slide-up notification renderer
+│   │   ├── ErrIcon.jsx                   ← Red field-level error icon
 │   │   └── modals/
-│   │       ├── PreviewModal.jsx          ← Full voucher preview with Print/PDF buttons
+│   │       ├── VoucherPreviewModal.jsx   ← Full voucher preview + Print/PDF actions
 │   │       ├── DeleteConfirmModal.jsx    ← Confirmation dialog before delete
 │   │       ├── AddPayeeModal.jsx         ← Input modal to create a new payee
 │   │       └── AddCategoryModal.jsx      ← Input modal to create a new category
 │   │
-│   ├── screens/
-│   │   ├── LedgerScreen.jsx              ← Stats + search/filter/sort + table
-│   │   └── VoucherFormScreen.jsx         ← Create / Edit voucher form
-│   │
-│   └── hooks/
-│       └── useVoucherForm.js             ← Custom hook: form state, validation,
-│                                             handleChange, handleBlur, handleSave
+│   └── pages/
+│       ├── DashboardPage.jsx             ← Welcome card + module tiles
+│       └── vouchers/
+│           ├── VouchersPage.jsx          ← Owns voucher state; switches Ledger ↔ Form
+│           ├── LedgerView.jsx            ← Stats + search/filter/sort + table
+│           └── VoucherForm.jsx           ← Create / edit form + add-payee / add-cat modals
 │
 ├── index.html                            ← Vite HTML template (do not modify)
-├── vite.config.js                        ← Vite configuration (do not modify)
+├── vite.config.js                        ← Vite configuration
+├── eslint.config.js                      ← ESLint flat config
 ├── package.json                          ← Dependencies and scripts
 └── README.md                             ← This file
 ```
+
+### Layout overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Sidebar (240px)        │  TopBar (60px)                     │
+│ ┌────────────────────┐ │  ┌──────────────────────────────┐  │
+│ │ Company Name       │ │  │ <Title>      [+ New] [🔔][⚙] │  │
+│ │ Voucher Mgmt Sys.  │ │  └──────────────────────────────┘  │
+│ ├────────────────────┤ │  ┌──────────────────────────────┐  │
+│ │ Dashboard          │ │  │                              │  │
+│ │                    │ │  │   <Active page content>      │  │
+│ │ MODULES            │ │  │                              │  │
+│ │ • Vouchers ◀active │ │  │   (scrollable)               │  │
+│ └────────────────────┘ │  └──────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+- **AppShell** is a CSS grid (`grid-template-columns: 240px 1fr; grid-template-rows: 60px 1fr;`) with the sidebar spanning both rows.
+- **TopBar** reads its title and action buttons from `TopBarContext`. Each page calls `useTopBar(title, actions, deps)` so sub-views (e.g. Ledger vs Form) can swap them dynamically.
+- **Notifications** and **Settings** icon buttons in the TopBar are placeholders — they render but have no handlers wired yet.
 
 ---
 
 ## Component Breakdown
 
-This section explains what each file does and what code to move into it.
-
----
-
-### `src/constants/data.js`
-
-Holds all static data and default values. Nothing dynamic — just arrays and objects.
-
-```js
-// Move these from App.jsx:
-export const INIT_CATS = [ 'CHEMICALS UNDER FREE LIST IMPORT', ... ];
-export const INIT_PAYEES = [ 'ANWER ASGHAR BROTHERS', ... ];
-export const SAMPLE = [ { id:1, voucher_no:'DV-001', ... }, ... ];
-export const EMPTY_FORM = { voucher_no:'', voucher_type:'Debit', ... };
-```
-
-**Import in App.jsx:**
-```js
-import { INIT_CATS, INIT_PAYEES, SAMPLE, EMPTY_FORM } from './constants/data';
-```
-
----
-
-### `src/utils/amountHelpers.js`
-
-All functions that deal with the amount decimal field.
-
-```js
-// Move these from App.jsx:
-export function parseAmt(val) { ... }   // "71978.50" → { rs: 71978, ps: 50 }
-export function fmtAmt(val) { ... }     // "71978.50" → "71,978.50"
-export function fmtAmtRs(val) { ... }   // "71978.50" → "71,978"
-export function fmtAmtPs(val) { ... }   // "71978.50" → "50"
-```
-
----
-
-### `src/utils/numberToWords.js`
-
-Converts a number to words in Pakistani format (ones, lakhs, crores).
-
-```js
-// Move this from App.jsx:
-export function numToWords(n) { ... }
-// Usage: numToWords(71978) → "SEVENTY ONE THOUSAND NINE HUNDRED SEVENTY EIGHT ONLY"
-```
-
----
-
-### `src/utils/dateHelpers.js`
-
-Converts between date formats because `<input type="date">` uses `YYYY-MM-DD` internally but the voucher displays `DD.MM.YYYY`.
-
-```js
-// Move these from App.jsx:
-export function toPicker(dmy) { ... }     // "13.01.2026" → "2026-01-13"
-export function fromPicker(ymd) { ... }   // "2026-01-13" → "13.01.2026"
-export function todayYMD() { ... }        // Returns today as "2026-01-13"
-export function dateToTs(dmy) { ... }     // "13.01.2026" → Unix timestamp (for sorting)
-```
-
----
-
-### `src/utils/voucherHelpers.js`
-
-Business logic for voucher numbering and form validation.
-
-```js
-// Move these from App.jsx:
-
-// Auto-generates next voucher number: DV-001, DV-002, CV-001 etc.
-export function nextNo(entries, type) { ... }
-
-// Returns an errors object. Empty object = form is valid.
-export function validate(form) {
-  const errors = {};
-  if (!form.date)          errors.date = 'Date is required';
-  if (!form.debit_category) errors.debit_category = 'Category is required';
-  if (!form.pay_to)        errors.pay_to = 'Payee is required';
-  if (!form.amount || +form.amount <= 0) errors.amount = 'Enter a valid amount';
-  return errors;
-}
-```
-
----
-
-### `src/utils/voucherHtml.js`
-
-Generates the complete voucher HTML string used by both the **Preview Modal** and the **Print** system. Returns raw HTML as a string — not a React component.
-
-```js
-// Move this from App.jsx:
-export function voucherHtml(entry) {
-  // Builds a <table> HTML string matching the original Excel voucher layout.
-  // Used by:
-  //   1. PreviewModal  → dangerouslySetInnerHTML
-  //   2. handlePrint   → injected into #htc-print div before window.print()
-  return `<div style="..."><table>...</table></div>`;
-}
-```
-
----
-
-### `src/utils/generatePDF.js`
-
-Draws the voucher PDF programmatically using jsPDF. Loads jsPDF from CDN on first use. Does **not** use html2canvas — draws rectangles, fills, and text directly to avoid sandbox restrictions.
-
-```js
-// Move this from App.jsx:
-export async function generatePDF(entry, showToast) {
-  // 1. Loads jsPDF from CDN if not already loaded
-  // 2. Creates an A4 jsPDF instance
-  // 3. Draws: header, voucher title, category row, PAY TO row,
-  //           narration block, TOTAL row, RUPEES row, signature row
-  // 4. Calls doc.save() to trigger browser download
-}
-```
-
----
-
-### `src/styles/app.css`
-
-Extract the `CSS` string from `App.jsx` and put it in a real `.css` file.
-
-In `App.jsx`, replace:
-```jsx
-<style>{CSS}</style>
-```
-With a standard import at the top of `App.jsx`:
-```js
-import './styles/app.css';
-```
-
-And delete the `const CSS = \`...\`` string entirely.
-
----
-
-### `src/components/layout/Header.jsx`
-
-The top navigation bar — navy background, company brand, and optional action button.
-
-```jsx
-// Props:
-// - title: string        "HAFEEZ TRADING COMPANY"
-// - subtitle: string     "Voucher Management System"
-// - action: node         Optional button on the right (e.g. "New Entry")
-
-export default function Header({ title, subtitle, action }) {
-  return (
-    <div className="hdr">
-      <div className="hdr-brand">
-        <div className="hdr-ico">...</div>
-        <div>
-          <div className="hdr-t">{title}</div>
-          <div className="hdr-s">{subtitle}</div>
-        </div>
-      </div>
-      {action}
-    </div>
-  );
-}
-```
-
----
-
-### `src/components/common/StatCard.jsx`
-
-One of the four summary cards shown above the ledger table.
-
-```jsx
-// Props:
-// - icon: node           Lucide icon component
-// - iconBg: string       Background colour e.g. "#EFF6FF"
-// - iconColor: string    Icon colour e.g. "#1D4ED8"
-// - label: string        "Total Debit (Rs.)"
-// - value: string        "71,978.00"
-// - valueColor: string   Text colour for the value
-
-export default function StatCard({ icon, iconBg, iconColor, label, value, valueColor }) { ... }
-```
-
----
-
-### `src/components/common/Toast.jsx`
-
-Slide-up notification that auto-dismisses after 3 seconds.
-
-```jsx
-// Props:
-// - message: string      The notification text
-// - type: string         'success' | 'error' | 'info'
-// - onDismiss: func      Called after timeout (to clear toast state)
-
-export default function Toast({ message, type, onDismiss }) { ... }
-```
-
----
-
-### `src/components/common/ErrorMessage.jsx`
-
-The small red message shown below invalid form fields.
-
-```jsx
-// Props:
-// - message: string    The error text to display
-
-export default function ErrorMessage({ message }) {
-  if (!message) return null;
-  return (
-    <div className="emsg">
-      <ErrorIcon />
-      {message}
-    </div>
-  );
-}
-```
-
----
-
-### `src/components/modals/PreviewModal.jsx`
-
-Shows the formatted voucher in a scrollable modal with Print and Download PDF buttons.
-
-```jsx
-// Props:
-// - entry: object        The voucher entry to preview
-// - onClose: func        Close the modal
-// - onPrint: func        Trigger print for this entry
-// - onDownload: func     Trigger PDF download for this entry
-// - pdfBusy: boolean     Disable download button while generating
-
-export default function PreviewModal({ entry, onClose, onPrint, onDownload, pdfBusy }) { ... }
-```
-
----
-
-### `src/components/modals/DeleteConfirmModal.jsx`
-
-Asks the user to confirm before deleting an entry.
-
-```jsx
-// Props:
-// - onConfirm: func      Called when user clicks "Yes, Delete"
-// - onCancel: func       Called when user clicks "Cancel"
-
-export default function DeleteConfirmModal({ onConfirm, onCancel }) { ... }
-```
-
----
-
-### `src/components/modals/AddPayeeModal.jsx`
-
-Small modal with a single text input to add a new payee to the dropdown list.
-
-```jsx
-// Props:
-// - onAdd: func(name)    Called with the new payee name (UPPERCASE)
-// - onClose: func        Close without adding
-
-export default function AddPayeeModal({ onAdd, onClose }) { ... }
-```
-
----
-
-### `src/components/modals/AddCategoryModal.jsx`
-
-Identical in structure to AddPayeeModal but for categories.
-
-```jsx
-// Props:
-// - onAdd: func(name)    Called with the new category name (UPPERCASE)
-// - onClose: func        Close without adding
-
-export default function AddCategoryModal({ onAdd, onClose }) { ... }
-```
-
----
-
-### `src/screens/LedgerScreen.jsx`
-
-The main view. Contains the stats dashboard, search/filter/sort controls, and the voucher table with action buttons.
-
-```jsx
-// Props passed down from App.jsx:
-// - entries: array         All voucher entries
-// - onEdit: func           Open form in edit mode for a specific entry
-// - onDelete: func         Mark entry for deletion (shows confirm modal)
-// - onPreview: func        Open preview modal for entry
-// - onPrint: func          Trigger print for entry
-// - onDownload: func       Trigger PDF download for entry
-// - onNewEntry: func       Open form in create mode
-// - totalDebit: number     Sum of all debit amounts
-// - totalCredit: number    Sum of all credit amounts
-// - pdfBusy: boolean       PDF generation in progress
-
-export default function LedgerScreen({ entries, onEdit, onDelete, onPreview,
-  onPrint, onDownload, onNewEntry, totalDebit, totalCredit, pdfBusy }) { ... }
-```
-
----
-
-### `src/screens/VoucherFormScreen.jsx`
-
-The Create / Edit form. Handles its own internal field state using the `useVoucherForm` custom hook, and calls `onSave` when complete.
-
-```jsx
-// Props:
-// - editEntry: object|null    null = create mode, object = edit mode
-// - entries: array            Needed to calculate next voucher number
-// - payees: array             List of payees for the dropdown
-// - categories: array         List of categories for the dropdown
-// - onSave: func(formData)    Called with the completed form object
-// - onCancel: func            Go back to ledger without saving
-// - onAddPayee: func(name)    Add a new payee to the global list
-// - onAddCategory: func(name) Add a new category to the global list
-
-export default function VoucherFormScreen({
-  editEntry, entries, payees, categories,
-  onSave, onCancel, onAddPayee, onAddCategory }) { ... }
-```
-
----
-
-### `src/hooks/useVoucherForm.js`
-
-Custom React hook that encapsulates all form state logic so `VoucherFormScreen` stays clean.
-
-```js
-// Usage inside VoucherFormScreen:
-// const { form, errors, touched, handleChange, handleBlur, handleSave } = useVoucherForm(props);
-
-export function useVoucherForm({ editEntry, entries, payees, onSave }) {
-  const [form, setForm] = useState(...);
-  const [errors, setErrors] = useState({});
-  const [touched, setTouched] = useState({});
-
-  const handleChange = (field, value) => { ... };
-  const handleBlur   = (field) => { ... };
-  const handleSave   = () => { ... };  // validates then calls onSave()
-
-  return { form, errors, touched, handleChange, handleBlur, handleSave };
-}
-```
+What each file does at a glance.
+
+| File | Responsibility |
+|---|---|
+| `App.jsx` | Holds `currentPage`, `printEntry`, and the toast hook. Renders `<TopBarProvider>` → `<AppShell>` → active page, plus `<PrintArea>` and `<Toast>` siblings. |
+| `main.jsx` | Vite entry. Imports `index.css`, `styles/shared.css`, `styles/layout.css`, then mounts `<App>`. |
+| `constants/seed.js` | `INIT_CATS`, `INIT_PAYEES`, `SAMPLE`, `EMPTY` form, and `COMPANY` (name/tagline shown in the sidebar). |
+| `utils/amount.js` | `parseAmt`, `fmtAmt`, `fmtAmtRs`, `fmtAmtPs`, `numToWords` (Pakistani Lakh/Crore format). |
+| `utils/date.js` | `toPicker`, `fromPicker`, `todayYMD`, `dateToTs`. Bridges `DD.MM.YYYY` storage with `<input type="date">`'s `YYYY-MM-DD`. |
+| `utils/voucher.js` | `nextNo(entries, type)` for auto-numbering and `validate(form)` returning per-field errors. |
+| `services/voucherHtml.js` | `voucherHtml(entry)` — HTML string used by both the preview modal and the print path. |
+| `services/pdf.js` | `generatePDF(entry, showToast)` — loads jsPDF from CDN on first call, then draws cells/text directly (no html2canvas). |
+| `styles/*.css` | Plain CSS. `shared` and `layout` load globally; `ledger`, `form`, `dashboard` are imported by their owning pages. |
+| `context/TopBarContext.js` | The React context object (kept in its own file so React Fast Refresh stays happy). |
+| `context/TopBarProvider.jsx` | Provider holding `{ title, actions, setTitle, setActions }`. |
+| `hooks/useToast.js` | Returns `{ toast, showToast(msg, type) }`. Auto-dismisses after 3s. |
+| `hooks/useTopBar.js` | `useTopBar(title, actions, deps)` lets a page declare its TopBar title + action node. `useTopBarState()` is consumed by `TopBar.jsx`. |
+| `layout/AppShell.jsx` | The CSS-grid shell. Renders `<Sidebar>`, `<TopBar>`, and `{children}`. |
+| `layout/Sidebar.jsx` | Company header + a static `NAV` array of groups/items. Calls `onNavigate(id)` on click. |
+| `layout/TopBar.jsx` | Reads `title` and `actions` from `TopBarContext`. Renders Notifications and Settings icon buttons. |
+| `components/PrintArea.jsx` | Renders the hidden `#htc-print` div used by `@media print`. Receives the entry to print. |
+| `components/Toast.jsx` | Slide-up notification. Background colour driven by `toast.type` (`success` / `error` / `info`). |
+| `components/ErrIcon.jsx` | Small red icon used in inline form error messages. |
+| `components/modals/VoucherPreviewModal.jsx` | Voucher preview with Print + Download PDF buttons. Receives `pdfBusy` to disable the download. |
+| `components/modals/DeleteConfirmModal.jsx` | Confirmation dialog. Controlled via `open` / `onCancel` / `onConfirm` props. |
+| `components/modals/AddPayeeModal.jsx` | Self-contained input modal. Uppercases + dedupes against `existing`, calls `onAdd(name)`. |
+| `components/modals/AddCategoryModal.jsx` | Same shape as the payee modal but for categories. |
+| `pages/DashboardPage.jsx` | Welcome card + clickable module tile. Sets TopBar title to "Dashboard". |
+| `pages/vouchers/VouchersPage.jsx` | Owns `entries`, `categories`, `payees`, `view`, `editEntry`, `pdfBusy`. Switches between `LedgerView` and `VoucherForm`. |
+| `pages/vouchers/LedgerView.jsx` | Stats grid, search/filter/sort controls, table, preview + delete modals. Sets TopBar title "Vouchers" with the `+ New Entry` action button. |
+| `pages/vouchers/VoucherForm.jsx` | Create/edit form with inline field validation, derived Rs./Ps. preview, "RUPEES in words" line, and the AddPayee + AddCategory modals. Sets TopBar title "New Voucher" / "Edit Voucher". |
 
 ---
 
@@ -681,34 +330,44 @@ Each voucher entry is a plain JavaScript object:
 
 ## State Management
 
-All state lives in `App.jsx` (no Redux or external state library needed at this scale).
+State is split by concern across three layers — no Redux or external store needed.
 
 ```
-App.jsx  ←─────────────────── holds all state
+App.jsx  ─── routing + shell-wide state
+│
+├── currentPage        'dashboard' | 'vouchers'
+├── printEntry         Entry to print (triggers @media print CSS)
+└── toast              { msg, type } or null   (via useToast hook)
+
+TopBarProvider  ─── TopBar contents (set by the active page)
+│
+├── title              Current screen title shown in the top bar
+└── actions            JSX node for page-specific action buttons
+
+pages/vouchers/VouchersPage.jsx  ─── all voucher domain state
 │
 ├── entries[]          All voucher records
-├── categories[]       List of category options (can grow via modal)
-├── payees[]           List of payee options (can grow via modal)
+├── categories[]       Category options (grows via modal)
+├── payees[]           Payee options (grows via modal)
 ├── view               'ledger' | 'form'
-├── editId             null (create) or number (edit)
+├── editEntry          null (create) or the entry being edited
+└── pdfBusy            Boolean — PDF generating in progress
+
+LedgerView.jsx  ─── view-local UI state
+│
+├── search · typeFilter · sortBy
+├── preview            Entry currently shown in preview modal (or null)
+└── delId              ID of entry pending deletion (or null)
+
+VoucherForm.jsx  ─── form-local state
+│
 ├── form               Current form field values
 ├── formErrors         Validation error messages per field
-├── touched            Which fields user has interacted with
-├── preview            Entry currently shown in preview modal (or null)
-├── delId              ID of entry pending deletion (or null)
-├── search             Search input string
-├── typeFilter         'All' | 'Debit' | 'Credit'
-├── sortBy             Sort key string
-├── pdfBusy            Boolean — PDF generating in progress
-├── toast              { msg, type } or null
-├── printEntry         Entry to print (triggers @media print CSS)
-├── payeeModal         Boolean
-├── catModal           Boolean
-└── new*               Temp state for the add modals
+├── touched            Which fields the user has interacted with
+└── payeeModal · catModal     Open flags for the add-new modals
 ```
 
-**Data flows downward** (App → Screens → Components) via props.
-**Events flow upward** via callback props (e.g. `onSave`, `onDelete`, `onAddPayee`).
+**Data flows downward** (App → Page → View / Form) via props. **Events flow upward** via callback props (`onSave`, `onDelete`, `onAddPayee`, `onRequestPrint`, …). The TopBar gets its content **sideways** through `TopBarContext`, set by whichever page is mounted.
 
 ---
 
